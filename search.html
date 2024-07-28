@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Musico</title>
+  
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="icon.png">
+</head>
+<body>
+  <div style="display: flex;">
+  <div style="background-color: rgb(19, 19, 19); height: 100vh;width: 250px;margin-right: 20px;border-radius: 10px;">
+    <div style="display: flex;margin-top: 20px;align-items: center;" class="logo"><img src="logo.png" style="height: 50px;margin-left: 30px;margin-right: 10px;"><p style="font-size: 25px;" onclick="clickLogo()">Musico</p></div>
+    <hr/>
+    <div style="text-align: center;">
+      <div style="display: flex;justify-content: center;"><p class="nav" onclick="clickSearch1()">Search</p></div>
+    </div>
+  </div>
+  <div style="background-color: rgb(19, 19, 19);border-radius: 10px;width: 100%;">
+    <div class="container">
+      <form class="search-bar"autocomplete="off">
+          <input type="text" id="searchInput" placeholder="Search for a song...">
+          <!-- <button onclick="clickSearch()" class="search">Search</button> -->
+          <input type="submit" value="Search" class="search"  onclick="clickSearch()" autocomplete="off">
+      </form>
+      <div class="search-results" id="searchResults"></div>
+      <div class="player" id="player"></div>
+  </div>
+</div>
+</div>
+  <script >
+    const form = document.querySelector('form'); 
+ 
+ form.addEventListener('submit', function(event) { 
+   event.preventDefault(); 
+   // Your form submission logic here 
+ }); 
+    function clickSearch1(){
+      window.location.href = "search.html"
+    }
+    function clickLogo(){
+      window.location.href = "/"
+    }
+    const songs = [
+      { title: 'Shape of You', url: './syl.mp3', writer: "Ed Sheeran", time:"3:02", icon:"./shape.png" },
+      { title: 'Shape of You - 2', url: './syl.mp3', writer: "Ed Sheeran", time:"3:02", icon:"./shape.png" },
+      { title: 'Blinding Lights', url: './syl.mp3', writer: "Kartik Garg", time:"3:02", icon:"./song.png" },
+      { title: 'Dance Monkey', url: './syl.mp3', writer: "Kartik Garg", time:"3:02", icon:"./song.png" },
+      { title: 'Rockstar', url: './syl.mp3', writer: "Kartik Garg", time:"3:02", icon:"./song.png" },
+      { title: 'Someone You Loved', url: './syl.mp3', writer: "Kartik Garg", time:"3:02", icon:"./song.png" }
+    ];
+
+    function clickSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const results = songs.filter(song => song.title.toLowerCase().includes(query));
+      displayResults(results);
+      document.getElementById('searchInput').value = "";
+    }
+
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+            results.forEach(result => {
+              const resultElement = document.createElement('div');
+              const img = document.createElement('img');
+                img.src = result.icon;
+                img.classList.add('search-result-icon');
+                const insidediv = document.createElement('div');
+                const p = document.createElement('p');
+                p.classList.add("p1")
+                const p2 = document.createElement('p');
+                p2.textContent = result.writer;
+                insidediv.appendChild(p)
+                insidediv.appendChild(p2)
+
+                p2.classList.add("p2")
+                 p.textContent = result.title;
+                resultElement.classList.add('search-result');
+                resultElement.addEventListener("mouseover", () => {
+                  resultElement.classList.add("hover-effect");
+                });
+                resultElement.addEventListener("mouseout", () => {
+                  resultElement.classList.remove("hover-effect");
+                });
+               
+                resultElement.appendChild(img);
+                resultElement.appendChild(insidediv);
+                resultElement.onclick = () => playSong(result.url);
+                resultsContainer.appendChild(resultElement);
+            });
+        }
+
+        function playSong(url) {
+      const playerContainer = document.getElementById('player');
+      playerContainer.innerHTML = `
+        <div class="audio-player">
+          <audio id="audio" src="${url}"></audio>
+          <div class="controls">
+            <button onclick="playPause()">Pause</button>
+            <input type="range" id="seekBar" value="0" max="100" onchange="seekAudio()">
+            <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+            <label for="volumeControl">Volume:</label>
+            <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1" onchange="setVolume()">
+            <label for="playbackRateControl">Speed:</label>
+            <select id="playbackRateControl" onchange="setPlaybackRate()">
+              <option value="0.5">0.5x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.5">1.5x</option>
+              <option value="2">2x</option>
+            </select>
+          </div>
+        </div>`;
+      const audio = document.getElementById('audio');
+      audio.play();
+      audio.addEventListener('timeupdate', updateSeekBar);
+      audio.addEventListener('loadedmetadata', () => {
+        document.getElementById('duration').textContent = formatTime(audio.duration);
+      });
+    }
+
+    function playPause() {
+      const audio = document.getElementById('audio');
+      const playButton = document.querySelector('.controls button');
+      if (audio.paused) {
+        audio.play();
+        playButton.textContent = 'Pause';
+      } else {
+        audio.pause();
+        playButton.textContent = 'Play';
+      }
+    }
+
+    function seekAudio() {
+      const audio = document.getElementById('audio');
+      const seekBar = document.getElementById('seekBar');
+      const seekTo = audio.duration * (seekBar.value / 100);
+      audio.currentTime = seekTo;
+    }
+
+    function updateSeekBar() {
+      const audio = document.getElementById('audio');
+      const seekBar = document.getElementById('seekBar');
+      const currentTime = document.getElementById('currentTime');
+      seekBar.value = (audio.currentTime / audio.duration) * 100;
+      currentTime.textContent = formatTime(audio.currentTime);
+    }
+
+    function setVolume() {
+      const audio = document.getElementById('audio');
+      const volumeControl = document.getElementById('volumeControl');
+      audio.volume = volumeControl.value;
+    }
+
+    function setPlaybackRate() {
+      const audio = document.getElementById('audio');
+      const playbackRateControl = document.getElementById('playbackRateControl');
+      audio.playbackRate = playbackRateControl.value;
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+  </script>
+</body>
+</html>
