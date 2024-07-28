@@ -55,7 +55,6 @@
       const query = document.getElementById('searchInput').value.toLowerCase();
       const results = songs.filter(song => song.title.toLowerCase().includes(query));
       displayResults(results);
-      document.getElementById('searchInput').value = "";
     }
 
         function displayResults(results) {
